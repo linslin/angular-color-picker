@@ -20,7 +20,7 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
 (function() {
     'use strict';
 
-    var colorPicker = function ($document) {
+    var colorPicker = function ($document, $rootScope) {
         return {
             restrict: 'E',
             require: ['^ngModel'],
@@ -196,6 +196,24 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
                     }
                 };
 
+                /**
+                 * Close helper action
+                 // */
+                $scope.close = function () {
+                    $rootScope.$broadcast('toggleColorpicker');
+                };
+
+                $scope.$watch('showColorPicker', function (newValue, oldValue) {
+                    if (newValue !== undefined) {
+                        if (newValue) {
+                            $scope.show();
+                        } else {
+                            $scope.hide();
+                        }
+                    }
+                });
+
+
                 $scope.update = function () {
                     if ($scope.hue !== undefined && $scope.saturation !== undefined && $scope.lightness !== undefined) {
                         var color = tinycolor({h: $scope.hue, s: $scope.saturation / 100, v: $scope.lightness / 100}),
@@ -273,16 +291,6 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
                         }
                     } else {
                         $scope.swatchColor = '';
-                    }
-                });
-
-                $scope.$watch('showColorPicker', function (newValue, oldValue) {
-                    if (newValue !== undefined) {
-                        if (newValue) {
-                            $scope.show();
-                        } else {
-                            $scope.hide();
-                        }
                     }
                 });
 
@@ -640,9 +648,7 @@ if (typeof module !== "undefined" && typeof exports !== "undefined" && module.ex
         };
     };
 
-    colorPicker.$inject = ['$document'];
-
-    angular.module('color.picker').directive('colorPicker', colorPicker);
+    angular.module('color.picker').directive('colorPicker', ['$document', '$rootScope', colorPicker]);
 })();
 
 angular.module('color.picker').run(['$templateCache', function($templateCache) {
@@ -659,7 +665,8 @@ angular.module('color.picker').run(['$templateCache', function($templateCache) {
         '       \'color-picker-panel-bottom color-picker-panel-right\': config.pos === \'bottom right\',\n' +
         '       \'color-picker-panel-bottom color-picker-panel-left\': config.pos === \'bottom left\',\n' +
         '   }">\n' +
-        '   <span class="ion-reply"></span>\n' +
+        '       <span class="ion-reply"></span>\n' +
+        '       <span ng-click="close();" class="ion-close-circled"></span>\n' +
         '       <div class="color-picker-hue color-picker-sprite">\n' +
         '           <div class="color-picker-slider"></div>\n' +
         '       </div>\n' +
